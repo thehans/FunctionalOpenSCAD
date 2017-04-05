@@ -245,12 +245,12 @@ function cylinder(h=1,r1,r2,center=false,r,d,d1,d2) =
 
 
 // **2D to 3D**
-function linear_extrude(height, center, convexity, twist, slices, scale, poly) = 
+function linear_extrude(height=100, center=false, convexity=1, twist=0, slices, scale=1.0, poly) = 
   is_poly_vector(poly) ? 
     [for (p = poly) _linear_extrude(height=height,center=center,convexity=convexity,twist=twist,slices=slices,scale=scale,poly=poly)] :
     _linear_extrude(height=height,center=center,convexity=convexity,twist=twist,slices=slices,scale=scale,poly=poly);
 
-function _linear_extrude(height=100, center=false, convexity=1, twist=0, slices, scale=1.0, poly) = 
+function _linear_extrude(height, center, convexity, twist, slices, scale, poly) = 
   let(
     points = get_points(poly),
     sl = slices == undef ? (twist == 0 ? 1 : 7) : slices,
@@ -346,12 +346,12 @@ function is_3d_poly(poly) = is_poly_vector(poly) ?
   len(get_points(poly)[0]) == 3;
   
 // scale
-function scale(v, poly) = is_poly_vector(poly) ? 
+function scale(v=1, poly) = is_poly_vector(poly) ? 
   [for (p=poly) _scale(v=v,poly=p)] :
   _scale(v=v,poly=poly);
 
 // scale for single poly, no vectors of polys
-function _scale(v=1, poly) = 
+function _scale(v, poly) = 
   let(
     points = get_points(poly),
     s = len(v) ? v : [v,v,v],
@@ -376,11 +376,11 @@ function resize(newsize,poly) =
   )
   scale(v1,poly);
 
-function rotate(a, v, poly) = is_poly_vector(poly) ? 
+function rotate(a=0, v, poly) = is_poly_vector(poly) ? 
   [for (p=poly) _rotate(a=a,v=v,poly=p)] :
   _rotate(a=a,v=v,poly=poly);
 
-function _rotate(a=0, v, poly) = 
+function _rotate(a, v, poly) = 
   let(
     points = get_points(poly),
     newPoints = is_3d_poly(points) || len(a) == 3 ? 
@@ -428,7 +428,7 @@ function _rotate3d_v(a, v, points) =
   ];
 
 // rotate about z axis without adding 3rd dimension to points
-function _rotate2d(a=0, points) = 
+function _rotate2d(a, points) = 
   let(cosa = cos(a), sina = sin(a))
   [for (p = points) [p.x * cosa - p.y * sina,p.x * sina + p.y * cosa]];
 

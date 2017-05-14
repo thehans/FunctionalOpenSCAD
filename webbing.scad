@@ -63,11 +63,7 @@ module webbing_demo() {
     }
 
   }
-  /*
-  dbg = webbing(d1, d2, c2, th, debug=true);
-  echo(dbg);
-  */
-  
+
 }
 
 
@@ -82,7 +78,7 @@ module webbing_demo() {
 // draw two circles connected by a continuous curve that necks down to a minimum thickness th, 
 // c2 is expected to be an [x,y] translation pair
 // use r3 parameter to override the radius calculated for th 
-function webbing(d1, d2, c2, th, r3, debug=false, second=false) = 
+function webbing(d1, d2, c2, th, r3) = 
   webbing_shape(d1/2, d2/2, r3 == undef ? webbing_r3(d1/2, d2/2, th, norm(c2)): r3, c2);
 
   
@@ -125,7 +121,6 @@ function webbing_shape(r1,r2,r3,c2) =
     a2 = atan2(c2.y, c2.x),
     a = r1+r3,
     b = r2+r3,
-    A = getLawCosA(a, b, d),
     B = getLawCosB(a, b, d),
     C = getLawCosC(a, b, d),
     c3 = [a*cos(B), a*sin(B)],

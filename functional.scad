@@ -150,7 +150,7 @@ function square(size=1, center=false,r=0) =
     o = center ? [-x/2,-y/2] : [0,0],
     d = r*2
   )
-  assert(d <= x && d <= y)
+  //assert(d <= x && d <= y)
   translate(o, 
     (r > 0 ? 
       concat(

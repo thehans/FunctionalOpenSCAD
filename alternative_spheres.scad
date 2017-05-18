@@ -1,11 +1,17 @@
 use <functional.scad>
 use <subdivision.scad>
 
-translate([-30,0,0]) poly3d(sphere(r=9,$fn=80));
-translate([-10,0,0]) poly3d(normalized_cube(r=9,div_count=20));
-translate([10,0,0]) poly3d(spherified_cube(9,div_count=20));
-translate([30,0,0]) poly3d(icosahedron(9,n=4));
+translate([-40,0,0]) poly3d(sphere2(r=9,$fn=80));
+translate([-20,0,0]) poly3d(sphere(r=9,$fn=80));
+translate([0,0,0]) poly3d(normalized_cube(r=9,div_count=20));
+translate([20,0,0]) poly3d(spherified_cube(9,div_count=20));
+translate([40,0,0]) poly3d(icosahedron(9,n=4));
 
+
+// This sphere is simpler to code but slightly different geometry from default OpenSCAD style (the poles come to a point)
+function sphere2(r=1, d) = 
+  let(R = d == undef ? r : d/2)
+  rotate_extrude(poly=arc(r=R, angle=180,offsetAngle=-90));
 
 function normalized_cube(r=1,div_count=12,d) = 
   let(

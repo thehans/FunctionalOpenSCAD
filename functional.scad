@@ -1,5 +1,7 @@
-// Functional OpenSCAD library by Hans Loeblich
-
+// "Functional OpenSCAD" library by Hans Loeblich
+// 
+// https://github.com/thehans/FunctionalOpenSCAD
+//
 // This library is an attempt to re-implement OpenSCAD's builtin modules 
 // as functions which operate directly on vertex data.
 // 

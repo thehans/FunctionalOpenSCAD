@@ -173,7 +173,7 @@ function circle(r=1, c=[0,0], internal=false, d) =
   [points,[irange(0,len(points)-1)]];
 
 
-// Draw a circular arc with center c, radius r, etc.
+// Generate a list of points for a circular arc with center c, radius r, etc.
 // "center" parameter centers the sweep of the arc about the offsetAngle (half to each side of it)
 // "internal" parameter enables polyhole radius correction
 function arc(r=1, angle=360, offsetAngle=0, c=[0,0], center=false, internal=false) = 
@@ -556,11 +556,11 @@ module showPoints(points, r=0.1) {
   for (c = points) translate(c) sphere(r=r);
 }
 
-module poly3d(poly) {
+module poly3d(poly, convexity=1) {
   if (is_poly_vector(poly))
     for (p = poly) polyhedron(points=p[0],faces=p[1]);
   else
-    polyhedron(points=poly[0],faces=poly[1]);
+    polyhedron(points=poly[0],faces=poly[1], convexity=convexity);
 }
 
 module poly2d(poly) {

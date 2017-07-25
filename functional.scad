@@ -129,6 +129,7 @@ function sum(v, i=0) = len(v) > i ? v[i] + sum(v, i+1) : 0;
 // depth of first elements, not necessarily max depth of a structure
 function depth(a,n=0) = len(a) == undef ? n : depth(a[0],n+1);
 function default(x,default) = x == undef ? default : x;
+function to_internal(r_in, r_max) = r_in / cos (180 / fragments(r_max == undef ? r_in : r_max));
 
 // Helper functions mainly used within other functions:
 
@@ -165,23 +166,28 @@ function square(size=1, center=false,r=0) =
     )
   );
 
-function circle(r=1, c=[0,0], internal=false, d) = 
+
+
+function circle(r=1, c=[0,0], internal=false, offsetAngle=0, d) = 
   let(
     r1 = d==undef ? r : d/2,
-    points = arc(r=r1,c=c,angle=-360,internal=internal)
+    points = arc(r=r1,c=c,angle=-360,offsetAngle=offsetAngle,internal=internal)
   )
   [points,[irange(0,len(points)-1)]];
+
+
 
 
 // Generate a list of points for a circular arc with center c, radius r, etc.
 // "center" parameter centers the sweep of the arc about the offsetAngle (half to each side of it)
 // "internal" parameter enables polyhole radius correction
-function arc(r=1, angle=360, offsetAngle=0, c=[0,0], center=false, internal=false) = 
+function arc(r=1, angle=360, offsetAngle=0, c=[0,0], center=false, internal=false, d) = 
   let (
-    fragments = ceil((abs(angle) / 360) * fragments(r,$fn)),
+    r1 = d==undef ? r : d/2,
+    fragments = ceil((abs(angle) / 360) * fragments(r1,$fn)),
     step = angle / fragments,
     a = offsetAngle-(center ? angle/2 : 0),
-    R = internal ? r / cos (180 / fragments) : r,
+    R = internal ? to_internal(r1) : r1,
     last = (abs(angle) == 360 ? 1 : 0)
   )
   [ for (i = [0:fragments-last] ) let(a2=i*step+a) c+R*[cos(a2), sin(a2)] ];
@@ -281,7 +287,7 @@ function _linear_extrude(height, center, convexity, twist, slices, scale, poly) 
   )
   [newPoints, faces];
 
-// WIP rotate_extrude
+
 // generate points/paths for a polyhedron, given a vector of 2d point data
 function rotate_extrude(angle=360, offsetAngle=0, center=false, v_offset=0, i_offset=0, poly) = 
   let(
@@ -327,10 +333,13 @@ function rotate_extrude(angle=360, offsetAngle=0, center=false, v_offset=0, i_of
             [[a,b,c]] : // triangle fan
             [[a,b,c], [c,b,d]] // full quad
           )
-    ])
+    ]),
+    faces = full_rev ? 
+      out_paths : 
+      concat(out_paths, [irange(l-1,0),irange(lp-l,lp-1)]) // include end caps
   )
   //assert(min_x >= 0)
-  [out_points, out_paths];
+  [out_points, faces];
 
 
 // **Transform**

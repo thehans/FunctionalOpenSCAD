@@ -11,6 +11,8 @@
 //    representing the max and min coordinates of all points that make up a shape or list of shapes
 //    This sort of calculation is not possible when using builtin modules because their vertex data is not accessible 
 
+functional_examples();
+
 // Some basic examples of how library functions can be used
 module functional_examples() {
 
@@ -38,8 +40,6 @@ module functional_examples() {
   // display corner points of bounding volume
   color("red") showPoints(b, r=0.5, $fn=20);
 }
-
-functional_examples();
 
 
 // The functions in this library have the same names as the builtin modules, 
@@ -130,7 +130,16 @@ function sum(v, i=0) = len(v) > i ? v[i] + sum(v, i+1) : 0;
 // depth of first elements, not necessarily max depth of a structure
 function depth(a,n=0) = len(a) == undef ? n : depth(a[0],n+1);
 function default(x,default) = x == undef ? default : x;
+// "polyhole" conversion, typically for internal holes
 function to_internal(r_in, r_max) = r_in / cos (180 / fragments(r_max == undef ? r_in : r_max));
+// angle between two vectors (2D or 3D)
+function anglev(v1,v2) = acos( (v1*v2) / (norm(v1)*norm(v2) ) );
+
+function sinh(x) = (1 - exp( -2 * x) )/ (2 * exp(-x));
+function cosh(x) = (1 + exp( -2 * x)) / (2 * exp(-x));
+function tanh(x) = sinh(x) / cosh(x);
+function cot(x) = 1 / tan(x);
+function mod(a,m) = a - m*floor(a/m);
 
 // Helper functions mainly used within other functions:
 
@@ -145,6 +154,25 @@ function fragments(r=1) = ($fn > 0) ?
 function linear_fragments(l=1) = ($fn > 0) ? 
   ($fn >= 3 ? $fn : 3) : 
   ceil(max(l / $fs),5);
+
+// Generate a list of points for a circular arc with center c, radius r, etc.
+// "center" parameter centers the sweep of the arc about the offsetAngle (half to each side of it)
+// "internal" parameter enables polyhole radius correction
+// optional "d" parameter overrides r
+// optional "fragments" parameter overrides calculations from $fn,$fs,$fa with a direct input
+// optional "endpoint" parameter specifies whether or not to include the last point in the arc, 
+//    by default the endpoint is included as long as the angle is not 360
+//    setting endpoint=false can be useful to avoid duplicating points if you are concatenating arc paths together
+function arc(r=1, angle=360, offsetAngle=0, c=[0,0], center=false, internal=false, d, fragments, endpoint) = 
+  let (
+    r1 = d==undef ? r : d/2,
+    fragments = fragments==undef ? ceil((abs(angle) / 360) * fragments(r1,$fn)) : fragments,
+    step = angle / fragments,
+    a = offsetAngle-(center ? angle/2 : 0),
+    R = internal ? to_internal(r1) : r1,
+    last = endpoint==undef ? (abs(angle) == 360 ? 1 : 0) : (endpoint ? 0 : 1)
+  )
+  [ for (i = [0:fragments-last] ) let(a2=i*step+a) c+R*[cos(a2), sin(a2)] ];
 
 // **2D Primitives**
 function square(size=1, center=false,r=0) =
@@ -167,31 +195,12 @@ function square(size=1, center=false,r=0) =
     )
   );
 
-
-
 function circle(r=1, c=[0,0], internal=false, offsetAngle=0, d) = 
   let(
     r1 = d==undef ? r : d/2,
     points = arc(r=r1,c=c,angle=-360,offsetAngle=offsetAngle,internal=internal)
   )
   [points,[irange(0,len(points)-1)]];
-
-
-
-
-// Generate a list of points for a circular arc with center c, radius r, etc.
-// "center" parameter centers the sweep of the arc about the offsetAngle (half to each side of it)
-// "internal" parameter enables polyhole radius correction
-function arc(r=1, angle=360, offsetAngle=0, c=[0,0], center=false, internal=false, d) = 
-  let (
-    r1 = d==undef ? r : d/2,
-    fragments = ceil((abs(angle) / 360) * fragments(r1,$fn)),
-    step = angle / fragments,
-    a = offsetAngle-(center ? angle/2 : 0),
-    R = internal ? to_internal(r1) : r1,
-    last = (abs(angle) == 360 ? 1 : 0)
-  )
-  [ for (i = [0:fragments-last] ) let(a2=i*step+a) c+R*[cos(a2), sin(a2)] ];
 
 
 // **3D Primitives**

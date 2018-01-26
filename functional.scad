@@ -589,7 +589,7 @@ module showPoints(points, r=0.1) {
 
 module poly3d(poly, convexity=1) {
   if (is_poly_vector(poly))
-    for (p = poly) polyhedron(points=p[0],faces=p[1]);
+    for (p = poly) polyhedron(points=p[0],faces=p[1], convexity=convexity);
   else
     polyhedron(points=poly[0],faces=poly[1], convexity=convexity);
 }

@@ -90,6 +90,7 @@ functional_examples();
 //  Extra Functions
 //    arc(r=1, angle=360, offsetAngle=0, c=[0,0], center=false, internal=false)
 //    bounds(poly)
+//    invert(poly)
 //    signed_area(points)
 
 //  Additonal Modules 
@@ -548,6 +549,10 @@ function _bounds_multi_3d(polys) =
     )
     [[minX,minY,minZ],[maxX,maxY,maxZ]];
 
+// reverse direction of all faces in polyhedron.
+function invert(poly) = 
+  let(faces = poly[1])    
+  [ poly[0], [for (face = faces) reverse(face)] ];
 
 function to3d(p) = let(l = len(p)) (l>2 ? [p.x,p.y,p.z] : (l>1 ? [p.x,p.y,0]:(l>0 ? [p.x,0,0] : [0,0,0])));
 function to2d(p) = let(l = len(p)) (l>1 ? [p.x,p.y]:(l>0 ? [p.x,0] : [0,0]));
@@ -570,7 +575,7 @@ function signed_area(points) =
 
 // visualize a vector of points
 module showPoints(points, r=0.1) {
-  for (c = points) translate(c) sphere(r=r);
+  for (c = points) translate(c) sphere(r=r, $fn=8);
 }
 
 module poly3d(poly, convexity=1) {

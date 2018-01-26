@@ -266,7 +266,15 @@ function _linear_extrude(height, center, convexity, twist, slices, scale, poly) 
     astep = -twist/sl,
     sstep = (scale-1)/sl,
     hoffset = center ? -height/2 : 0,
-    newPoints = flatten([for (i = [0:sl]) rotate(a=astep*i, poly=translate([0,0,hstep*i+hoffset], poly=scale(1+sstep*i, poly=points)))]),
+    newPoints = flatten([for (i = [0:sl]) 
+      rotate(a=astep*i, poly=
+        translate([0,0,hstep*i+hoffset], poly=
+          scale(1+sstep*i, poly=
+            points
+          )
+        )
+      )
+    ]),
     l = len(points),
     lp = len(newPoints),
     faces = concat(

@@ -25,33 +25,58 @@ module functional_examples() {
     ) 
   );  
   
-  // assigning to intermediate variables
-  shape = sphere(d=4,$fn=20);
+  d1 = 4;
+  r1 = d1/2;
+  
+  // assigning function results to intermediate variables
+  shape = sphere(d=d1,$fn=20);
   moved_shape = translate([-10,0,0], poly=shape);
   color("blue") poly3d(moved_shape);  
-
+  
+  // calculate properties of the geometry
+  echo(str("volume of blue: ", signed_volume(moved_shape), " mm^3" ) );
+  echo(str("volume of perfect sphere: V = 4/3*PI*r^3 = ", (4/3)*PI*pow(r1,3), " mm^3" ));
+  
   // make a vector containing multiple shapes
   shape_vector = [ for (i = [-1:1]) translate([0,i*10,0], poly=cube(i*2+4,center=true)) ];
   color("green") poly3d(shape_vector);
+
+  // compute properties on lists
   b = bounds(shape_vector);
-  // output bounds data to console
-  echo(b);
-  
-  // display corner points of bounding volume
-  color("red") showPoints(b, r=0.5, $fn=20);
+  echo(bounds=b);
+  volumes = [for (shape = shape_vector) signed_volume(shape) ];
+  echo(volumes=volumes);
+  volumesum = signed_volume(shape_vector);
+  echo(volumesum=volumesum);
+
+  // show corner points of a bounding volume
+  color("red") showPoints(b, r=0.5, $fn=40);
+
+  // debug point locations
+  showPoints(shape_vector);
+  //echo(shape_vector=shape_vector);
+
+  // display the bounding volume
+  //color([1,1,1,0.1]) translate(b[0]) cube(b[1]-b[0]);
 }
 
 
 // The functions in this library have the same names as the builtin modules, 
 // but that doesn't mean they are overriden.  The OpenSCAD language distinguishes between 
-// function calls and module calls based on syntax and context
+// function calls and module calls based on syntax and context.
 // Functions always return a result:
 //    poly = square([1,2]);   // the result must be either assigned to a variable, or...
 //    poly2d(square([1,2]));  // passed directly(or as part of an expression) as a parameter to a module or function
 //    in these contexts square is expected to return a value, so OpenSCAD knows to call the square function from our library
-// Modules can't be passed as parameters, and can't be assigned to variables.  Module calls are valid statements by themselves
+// Modules can't be passed as parameters, and can't be assigned to variables.  Module calls are valid statements by themselves:
 //    square();
-//    since its not being stored in a variable or passed as parameter, OpenSCAD knows to call builtin square module
+//    Since the call to square above is not stored in a variable or passed as parameter, 
+//    OpenSCAD knows to call builtin square module.
+
+// The functions provided by this library, being functions, cannot directly output a geometry that OpenSCAD would display, 
+// they can only return values (nested lists of points, faces, etc).
+// To display our shapes, we must call polygon or polyhedron (modules) with the output of our function calls.
+// poly2d(poly) and poly3d(poly) are two modules defined in this library to act as shortcuts for calling polygon and polyhedron 
 
 // Functions for primitives return shapes in the form of nested vectors
 // 2d shapes are represented by a vector with two elements: poly=[points, paths] 
@@ -68,7 +93,7 @@ module functional_examples() {
 
 // Library API Reference
 
-// Function listed here copy the behavior of a builtin module
+// Function listed here copy the behavior of a builtin module (with additional parameters in some cases).
 //  2D Primitives
 //    square(size=1, center=false,r=0)
 //    circle(r=1, c=[0,0], internal=false, d)
@@ -92,16 +117,12 @@ module functional_examples() {
 //    bounds(poly)
 //    invert(poly)
 //    signed_area(points)
+//    signed_volume(poly)
 
 //  Additonal Modules 
 //    poly3d(poly)
 //    poly2d(poly)
-//    showPoints(points, r=0.1)
-
-// Functions by themselves will never create a geometry that OpenSCAD would display, they can only return values.
-// To display our shapes, we must call polygon or polyhedron on the results of our functions.
-
-// poly2d(poly) and poly3d(poly) act as shortcuts for calling polygon and polyhedron 
+//    showPoints(poly, r=0.1)
 
 // OpenSCAD Modules not (yet) implemented as Functions
 //  3D to 2D
@@ -579,12 +600,37 @@ function signed_area(points) =
       p_i.x * p_i1.y - p_i1.x * p_i.y
   ])/2;
 
+function signed_volume(poly) = is_poly_vector(poly) ? 
+  sum([for (p=poly) _signed_volume(p)]) :
+  _signed_volume(poly);
+
+function _signed_volume(poly) =
+  let(
+    points = poly[0],
+    faces = poly[1]
+  )
+  sum([for(face = faces) 
+    let(l = len(face))
+    (l > 2) ?
+      sum([ for(i = [1:l-2])
+        cross(points[face[i+1]], points[face[i]]) * points[face[0]]
+      ]) / 6 :
+      0
+  ]);  
 
 /* Visualizations */
 
 // visualize a vector of points
-module showPoints(points, r=0.1) {
-  for (c = points) translate(c) sphere(r=r, $fn=8);
+module showPoints(poly, r=0.1, $fn=8) {
+  if (is_poly_vector(poly))
+    for (p = poly) _showPoints(p, r);
+  else
+    _showPoints(poly, r);
+}
+
+module _showPoints(poly, r) {
+  points = get_points(poly);
+  for (c = points) translate(c) sphere(r=r);
 }
 
 module poly3d(poly, convexity=1) {

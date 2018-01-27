@@ -50,15 +50,15 @@ Additionally, a poly may represent a "poly vector" (list of polys), which most f
  * `poly = [ [points, faces], [points2, faces2], ...]`
  * `poly = [ [points, paths], [points2, paths2], ...]`
 
-In OpenSCAD, functions can not have or interact with 
+In OpenSCAD, **functions** can not have or interact with 
 [`children`](https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/User-Defined_Functions_and_Modules#Children) 
-in the way that OpenSCAD modules do.  Therefore we must pass our `poly` data as the last parameter for all Transformation functions, etc.
+in the way that OpenSCAD **modules** do.  Therefore we must pass our `poly` data as the last parameter for all Transformation **functions**, etc.
 
 ## API Reference for functional.scad
 
 ### OpenSCAD Builtin Modules Implemented as Functions
 
-All functions here are intended to behave identically to their OpenSCAD builtin counterparts, however some may have additional parameters.  The already mentioned `poly` parameter is **always required** when present.  Any other parameters have been added as convenience features to enhance default functionality, and are completely optional. 
+All **functions** here are intended to behave identically to their OpenSCAD builtin counterparts, however some may have additional parameters.  The already mentioned `poly` parameter is **always required** when present.  Any other parameters have been added as convenience features to enhance default functionality, and are completely optional. 
 All parameters not part of OpenSCAD builtins are marked in **bold** to distinguish them.
  
  #### 2D Primitives

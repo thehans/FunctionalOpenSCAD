@@ -59,16 +59,25 @@ in the way that OpenSCAD **modules** do.  Therefore we must pass our `poly` data
 ### Library Files
 
 <dl>
-   <dt><a href="#functional">functional.scad</a></dt>
-   <dd>The core of FunctionalOpenSCAD.  All functions that implement OpenSCAD builtins are contained in this file, plus a few utilities and extras</dt>
-   <dt><a href="#alternative_spheres">alternative_spheres.scad</a></dt>
-   <dd>Alternative implementations of spherical geometries, using different methods of tesselation, (eg. subdivided icosahedron).</dd>
-   <dt><a href="#double_fillet">double_fillet.scad</a></dt>
-   <dd>Provides double_fillet function which generates a smooth transition between two parallel surfaces</dd>
-   <dt><a href="#subdivision">subdivision.scad</a></dt>
-   <dd>Provides subdivision function which splits each triangle in a 3D `poly` into 4 smaller triangles by adding midpoints.  Included by `alternatives_spheres.scad`</dd>
-   <dt><a href="#webbing">webbing.scad</a></dt>
-   <dd>Implements `webbing` which is a way to connect two separate circles with a smooth transition to a thin section between them.</dd>
+
+<dt><a href="#functional">functional.scad</a></dt>
+<dd>The core of FunctionalOpenSCAD.  All functions that implement OpenSCAD builtins are contained in this file, plus a few utilities and extras</dt>
+
+<dt><a href="#alternative_spheres">alternative_spheres.scad</a></dt>
+<dd>Alternative implementations of spherical geometries, using different methods of tesselation, (eg. subdivided icosahedron).</dd>
+
+<dt><a href="#double_fillet">double_fillet.scad</a></dt>
+<dd>Provides double_fillet function which generates a smooth transition between two parallel surfaces.</dd>
+
+<dt><a href="#planes">planes.scad</a></dt>
+<dd>Functions relating to geometric planes.</dd>
+
+<dt><a href="#subdivision">subdivision.scad</a></dt>
+<dd>Provides subdivision function which splits each triangle in a 3D poly into 4 smaller triangles by adding midpoints.  Included by alternatives_spheres.scad</dd>
+
+<dt><a href="#webbing">webbing.scad</a></dt>
+<dd>Implements "webbing" function which is a way to connect two separate circles with a smooth transition to a thin section between them.</dd>
+
 </dl>
 
 <a name="functional"></a>
@@ -149,6 +158,29 @@ All parameters not part of OpenSCAD builtins are marked in **bold** to distingui
 * xoffset2 distance from edge of first radius to the start of second radius.  0 value makes straight wall, < 0 makes overhang
 * closed = true will return a closed polygon ready for extrusion, while cloesd == false returns a just the curved vertex path that can be use as part of a larger path
   </dd>
+</dl>
+
+
+<a name="planes"></a>
+## planes.scad
+<dl>   
+<dt>function planeFromPoints(a, b, c)</dt>
+<dd>Create a plane from any 3 points.</dd>
+
+<dt>function planeFromFace(poly, iface, lasti=2)</dt>
+<dd>Find the plane tangent to a specific polyhedron face.</dd>
+
+<dt>module showPlane(plane, size=[100,100,0.05])</dt>
+<dd>Visualize a plane as a finite thin cube.</dd>
+
+<dt>function splitPolygonByPlane(plane, polyh, iface)</dt>
+<dd>Atttempted port of OpenJSCAD / csg.js "splitPolygonByPlane" function, prerequisit for further development of boolean operations, projection, etc.
+
+returns [front, coplanarFront, coplanarBack, back] each containing a list of points, or nan
+
+**INCORRECT IMPLEMENTATION, NEEDS DEBUGGING**
+</dd>
+  
 </dl>
 
 

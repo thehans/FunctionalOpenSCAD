@@ -54,12 +54,30 @@ In OpenSCAD, **functions** can not have or interact with
 [`children`](https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/User-Defined_Functions_and_Modules#Children) 
 in the way that OpenSCAD **modules** do.  Therefore we must pass our `poly` data as the last parameter for all Transformation **functions**, etc.
 
-## API Reference for functional.scad
+## API Reference 
 
-### OpenSCAD Builtin Modules Implemented as Functions
+### Library Files
+
+<dl>
+   <dt><a href="#functional">functional.scad</a></dt>
+   <dd>The core of FunctionalOpenSCAD.  All functions that implement OpenSCAD builtins are contained in this file, plus a few utilities and extras</dt>
+   <dt><a href="#alternative_spheres">alternative_spheres.scad</a></dt>
+   <dd>Alternative implementations of spherical geometries, using different methods of tesselation, (eg. subdivided icosahedron).</dd>
+   <dt><a href="#double_fillet">double_fillet.scad</a></dt>
+   <dd>Provides double_fillet function which generates a smooth transition between two parallel surfaces</dd>
+   <dt><a href="#subdivision">subdivision.scad</a></dt>
+   <dd>Provides subdivision function which splits each triangle in a 3D `poly` into 4 smaller triangles by adding midpoints.  Included by `alternatives_spheres.scad`</dd>
+   <dt><a href="#webbing">webbing.scad</a></dt>
+   <dd>Implements `webbing` which is a way to connect two separate circles with a smooth transition to a thin section between them.</dd>
+</dl>
+
+<a name="functional"></a>
+## functional.scad
 
 All **functions** here are intended to behave identically to their OpenSCAD builtin counterparts, however some may have additional parameters.  The already mentioned `poly` parameter is **always required** when present.  Any other parameters have been added as convenience features to enhance default functionality, and are completely optional. 
 All parameters not part of OpenSCAD builtins are marked in **bold** to distinguish them.
+
+### OpenSCAD Builtin Modules Implemented as Functions
  
  #### 2D Primitives
    * square(size=1, center=false, **r=0**)
@@ -102,3 +120,58 @@ All parameters not part of OpenSCAD builtins are marked in **bold** to distingui
    * [union](https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/The_OpenSCAD_Language#union)
    * [difference](https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/The_OpenSCAD_Language#difference)
    * [intersection](https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/The_OpenSCAD_Language#intersection)
+
+<a name="alternative_spheres"></a>
+## alternative_spheres.scad
+<dl>
+  <dt>sphere2(r=1, d)</dt>
+  <dd>Simplest sphere implementation, where poles come to points(very slightly different geometry from builtin)</dd>
+  <dt>normalized_cube(r=1,div_count=12,d)</dt>
+  <dd>Sphere from a simple cube mapping</dd>
+  <dt>spherified_cube(r=1,origin=[0,0,1],div_count=12,d)</dt>
+  <dd>Sphere from a more balanced cube mapping</dd>
+  <dt>icosahedron(r=1,d,n=0)</dt>
+  <dd>Subdivided icosahedron mapping (geodesic sphere).
+
+* n = subdivision iterations. (number of faces = 20 * 4^n)
+  </dd>
+</dl>
+
+<a name="double_fillet"></a>
+## double_fillet.scad
+<dl>
+  <dt>double_fillet(h=1, r1=1, r2=1, xoffset1=0, xoffset2=0, closed=true)</dt>
+  <dd>Double Fillet generates a path that is a smooth transition between two parallel surfaces
+
+* h is the vertical distance between surfaces, negative height will mirror about the vertical axis
+* r1 and r2 are the first and second fillet radius traversing away from origin
+* xoffset1 distance from origin where first radius begins ( should be >= 0 )
+* xoffset2 distance from edge of first radius to the start of second radius.  0 value makes straight wall, < 0 makes overhang
+* closed = true will return a closed polygon ready for extrusion, while cloesd == false returns a just the curved vertex path that can be use as part of a larger path
+  </dd>
+</dl>
+
+
+<a name="subdivision"></a>
+## subdivision.scad
+<dl>
+  <dt>subdivide_faces(n=1, poly)</dt>
+  <dd>Subdivide each triangle in `poly` into 4 smaller triangles.  Additional points are created but the volume remains unchanged by this function.  
+
+* n = subdivision iterations. (number of faces = 20 * 4^n)   
+   </dd>
+</dl>
+
+
+<a name="webbing"></a>
+## webbing.scad
+<dl>
+  <dt>webbing(d1, d2, c2, th, r3)</dt>
+  <dd>Draw two circles connected by a continuous curve that necks down to a minimum thickness th.
+
+* d1 = diameter of 1st circle
+* d2 = diameter of 2nd circle
+* c2 = an [x,y] translation pair for 2nd circle
+* th = minimum thickness of webbing between circles
+* r3 = optionally override the radius calculated for th 
+</dl>

@@ -65,7 +65,12 @@ function flatten(l) = [ for (a = l) for (b = a) b ];
 function reverse(v) = [ for (i = [0:len(v)-1])  v[len(v) -1 - i] ];
 // integer based range, inclusive
 function irange(a,b) = let (step = a > b ? -1 : 1) [ for (i = [a:step:b]) i ];
+
+// sum a vector of numbers.  sum([]) == 0
 function sum(v, i=0) = len(v) > i ? v[i] + sum(v, i+1) : 0;
+// sum a vector of vectors.  vsum([]) == undef
+function vsum(v,i=0) = len(v)-1 > i ? v[i] + vsum(v, i+1) : v[i];
+
 // depth of first elements, not necessarily max depth of a structure
 function depth(a,n=0) = len(a) == undef ? n : depth(a[0],n+1);
 function default(x,default) = x == undef ? default : x;

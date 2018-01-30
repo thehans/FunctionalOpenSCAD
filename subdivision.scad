@@ -1,6 +1,7 @@
 use <functional.scad>
 
 // faces better be triangles... or else!
+
 function subdivide_faces(n=1, poly) = 
   let(
     points = poly[0],
@@ -30,14 +31,12 @@ function subdivide_faces(n=1, poly) =
   n > 1 ? subdivide_faces(n-1, [allpoints, faces]) : n > 0 ? [allpoints,faces] : poly;
 
 //Utility function for splitting circular vectors.
-function range (list,start,end)=
+function circle_cut (list,start,end)=
    (end<start)?
       concat([for (i=[start:len(list)-1]) list[i]],[for (i=[0:end]) list[i]])
    :
       [for (i=[start:end]) list[i]]
 ;
-
-function vsum(v,i=0) = len(v) > i ? v[i] + vsum(v, i+1) : [0,0,0];
 
 //Ineffictient (Order N^2) naive face triangulation function that works
 //by ear clipping:
@@ -58,7 +57,7 @@ function triangulate_face(points,face)=
    (3==count)?
       [face]
    :
-      let(wd=winding_direction(points,face),cv=convexvertex(wd,points,face),
+      let(wd=face_winding(points,face),cv=convex_vertex(wd,points,face),
           pv=(count+cv-1)%count,nv=(cv+1)%count,
           p0=points[face[pv]],p1=points[face[cv]],p2=points[face[nv]],
           tests=[
@@ -66,29 +65,40 @@ function triangulate_face(points,face)=
              [cross(wd,p1-p0),cross(wd,p1-p0)*p1],
              [cross(wd,p2-p1),cross(wd,p2-p1)*p2]
           ],
-          eartest=pointinear(points,face,tests),
+          eartest=point_in_ear(points,face,tests),
           clipableear=(eartest[0]<0),
           diagonalpoint=eartest[1]
        )
        (clipableear)? //There is no point inside the ear.
           flatten([
-             [range(face,pv,nv)],
-             triangulate_face(points,range(face,nv,pv))
+             [circle_cut(face,pv,nv)],
+             triangulate_face(points,circle_cut(face,nv,pv))
           ])
        : //If there is a point inside the ear, make a diagonal and clip along that.
           flatten([
-             triangulate_face(points,range(face,cv,diagonalpoint)),
-             triangulate_face(points,range(face,diagonalpoint,cv))
+             triangulate_face(points,circle_cut(face,cv,diagonalpoint)),
+             triangulate_face(points,circle_cut(face,diagonalpoint,cv))
           ])
 ;
 
-
-function winding_direction(points,face)=
-   let(count=len(face))
-   vsum([for(i=[0:count-1]) cross(points[face[(i+1)%count]]-points[face[(i)%count]],points[face[(i+2)%count]]-points[face[(i+1)%count]])],0)
+function vsum(v_list,i=0)=
+  (i<len(v_list)-1)?
+     v_list[i]+vsum(v_list,i+1)
+  :
+     [0,0,0]
 ;
 
-function convexvertex(wd,points,face,i=0)=
+function face_winding(points,face)=
+   let(count=len(face))
+   vsum([
+      for(i=[0:count-3]) cross(
+         points[face[(i+1)]]-points[face[0]],
+         points[face[(i+2)]]-points[face[(i+1)]]
+      )
+   ])
+;
+
+function convex_vertex(wd,points,face,i=0)=
    let(count=len(face)-1,
        p0=points[face[i]],p1=points[face[(i+1)%count]],p2=points[face[(i+2)%count]]
    )
@@ -96,7 +106,7 @@ function convexvertex(wd,points,face,i=0)=
       (cross(p1-p0,p2-p1)*wd>0)? 
          (i+1)%count
       :
-         convexvertex(wd,points,face,i+1)
+         convex_vertex(wd,points,face,i+1)
    ://This should never happen since there is at least 1 convex vertex.
       undef
 ;
@@ -104,21 +114,21 @@ function convexvertex(wd,points,face,i=0)=
 //The order of tests matters - This assumes Test 0 indicates which point is furthest in 
 //the ear - and that point will form a diagonal with the tip of the ear.
 
-function pointinear(points,face,tests,i=0)=
+function point_in_ear(points,face,tests,i=0)=
     (i<len(face)-1)?
        let(
-           prev=pointinear(points,face,tests,i+1),
-           test=checkpointinear(points[face[i]],tests)
+           prev=point_in_ear(points,face,tests,i+1),
+           test=check_point_in_ear(points[face[i]],tests)
        )
        (test>prev[0])?
           [test,i]
        :
           prev
     :
-       [checkpointinear(points[face[i]],tests),i]
+       [check_point_in_ear(points[face[i]],tests),i]
 ;
 
-function checkpointinear (point,tests)=
+function check_point_in_ear (point,tests)=
    let(
       result=[
          (point*tests[0][0])-tests[0][1],

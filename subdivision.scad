@@ -99,7 +99,7 @@ function face_winding(points,face)=
 ;
 
 function convex_vertex(wd,points,face,i=0)=
-   let(count=len(face)-1,
+   let(count=len(face),
        p0=points[face[i]],p1=points[face[(i+1)%count]],p2=points[face[(i+2)%count]]
    )
    (len(face)>i)?

@@ -88,7 +88,7 @@ function mod(a,m) = a - m*floor(a/m);
 // Helper functions mainly used within other functions:
 
 // based on get_fragments_from_r documented on wiki
-// https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/The_OpenSCAD_Language
+// https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/The_OpenSCAD_Language#$fa,_$fs_and_$fn
 function fragments(r=1) = ($fn > 0) ? 
   ($fn >= 3 ? $fn : 3) : 
   ceil(max(min(360.0 / $fa, r*2*PI / $fs), 5));

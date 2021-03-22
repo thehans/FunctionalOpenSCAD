@@ -1,15 +1,15 @@
 use <functional.scad>
 use <subdivision.scad>
 
-translate([-40,0,0]) poly3d(sphere2(r=9,$fn=80));
-translate([-20,0,0]) poly3d(sphere(r=9,$fn=80));
-translate([0,0,0]) poly3d(normalized_cube(r=9,div_count=20));
-translate([20,0,0]) poly3d(spherified_cube(9,div_count=20));
-translate([40,0,0]) poly3d(icosahedron(9,n=4));
+translate([-40,0,0]) poly3d(sphere2(r=9,$fn=40));
+translate([-20,0,0]) poly3d(sphere(r=9,$fn=40));
+translate([0,0,0])  poly3d(normalized_cube(r=9,div_count=10));
+translate([20,0,0]) poly3d(spherified_cube(9,div_count=10));
+translate([40,0,0]) poly3d(icosahedron(9,n=3));
 
-
-// This sphere is simpler to code but slightly different geometry from default OpenSCAD style (the poles come to a point)
-function sphere2(r=1, d) = 
+// This sphere is simpler to code but slightly different geometry from
+// default OpenSCAD style. (the poles come to a point)
+function sphere2(r=1, d) =
   let(R = d == undef ? r : d/2)
   rotate_extrude(poly=arc(r=R, angle=180,offsetAngle=-90));
 
@@ -21,8 +21,8 @@ function normalized_cube(r=1,div_count=12,d) =
     up = [0,1,0],
     div2 = div_count/2,
     face_points = [
-      for (j = [0:div_count], 
-           i = [0:div_count])
+      for (j = [0:1:div_count], 
+           i = [0:1:div_count])
         let(
           face_point = origin + 2.0 * (right * (i-div2) + up * (div2-j)) / div_count
         )
@@ -36,23 +36,21 @@ function normalized_cube(r=1,div_count=12,d) =
       rotate([180,0,0],poly=face_points),
       rotate([0,-90,0],poly=face_points),
       rotate([0,90,0],poly=face_points)
-    ), 
+    ),
     faces = [
-      for (f = [0:6-1],
-           j = [0:div_count-1], 
-           i = [0:div_count-1]) 
+      for (f = [0:5],
+           j = [0:1:div_count-1], 
+           i = [0:1:div_count-1]) 
         let (
           i0=f*lface+j*(div_count+1)+i,
           i1=i0+1,
           i2=i0+(div_count+1),
           i3=i2+1
-          //tri1 = 
         )
-        [[i0,i1,i3],
-         [i0,i3,i2]]
-    ] // groups of two need to be concat'd
+        [i0,i1,i3,i2]
+    ]
   )
-  [points,flatten(faces)];
+  [points,faces];
 
 
 function spherified_cube(r=1,origin=[0,0,1],div_count=12,d) = 
@@ -62,8 +60,8 @@ function spherified_cube(r=1,origin=[0,0,1],div_count=12,d) =
     up = [0,1,0],
     div2 = div_count/2,
     face_points = [
-      for (j = [0:div_count], 
-           i = [0:div_count])
+      for (j = [0:1:div_count], 
+           i = [0:1:div_count])
         let(
           p = origin + 2.0 * (right * (i-div2) + up * (div2 - j)) / div_count,
           p2 = [p.x*p.x,p.y*p.y,p.z*p.z],
@@ -81,23 +79,21 @@ function spherified_cube(r=1,origin=[0,0,1],div_count=12,d) =
       rotate([180,0,0],poly=face_points),
       rotate([0,-90,0],poly=face_points),
       rotate([0,90,0],poly=face_points)
-    ), 
+    ),
     faces = [
-      for (f = [0:6-1],
-           j = [0:div_count-1], 
-           i = [0:div_count-1]) 
+      for (f = [0:5],
+           j = [0:1:div_count-1], 
+           i = [0:1:div_count-1]) 
         let (
           i0=f*lface+j*(div_count+1)+i,
           i1=i0+1,
           i2=i0+(div_count+1),
           i3=i2+1
-          //tri1 = 
         )
-        [[i0,i1,i3],
-         [i0,i3,i2]]
-    ] // groups of two need to be concat'd
+        [i0,i1,i3,i2]
+    ]
   )
-  [points,flatten(faces)];
+  [points,faces];
 
 
 // n = subdivision iterations (number of faces = 20 * 4^n)

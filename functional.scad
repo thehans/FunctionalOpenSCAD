@@ -350,7 +350,7 @@ function rotate(a=0, v, poly) = is_poly_vector(poly) ?
 function _rotate(a, v, poly) =
   let(
     points = get_points(poly),
-    newPoints = is_3d_poly(points) || len(a) == 3 ?
+    newPoints = is_3d_poly(points) || (is_vec(a) && len(a) == 3) ?
       _rotate3d(a=a,v=v,points=points) :
       _rotate2d(a=a,points=points)
   )

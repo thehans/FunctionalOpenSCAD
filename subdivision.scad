@@ -1,6 +1,7 @@
 use <functional.scad>
 
-// faces better be triangles... or else!
+// Divide faces (triangles only) into 4 sub-triangles, recursively
+// "Resolution" is limited to (4^n * input_faces)
 function subdivide_faces(n=1, poly) = 
   let(
     points = poly[0],

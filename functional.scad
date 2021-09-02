@@ -66,7 +66,7 @@ function reverse(v) = [ for (i = [0:len(v)-1])  v[len(v) -1 - i] ];
 function irange(a,b) = let (step = a > b ? -1 : 1) [ for (i = [a:step:b]) i ];
 
 // sum a vector of numbers.  sum([]) == 0
-function sum(v, i=0) = len(v) > i ? v[i] + sum(v, i+1) : 0;
+function sum(v, i=0, s=0) = len(v) > i ? sum(v, i+1, s+v[i]) : s;
 // sum a vector of vectors.  vsum([]) == undef
 function vsum(v,i=0) = len(v)-1 > i ? v[i] + vsum(v, i+1) : v[i];
 
@@ -77,6 +77,8 @@ function default(x,default) = x == undef ? default : x;
 function to_internal(r_in, r_max) = r_in / cos (180 / fragments(r_max == undef ? r_in : r_max));
 // angle between two vectors (2D or 3D)
 function anglev(v1,v2) = acos( (v1*v2) / (norm(v1)*norm(v2) ) );
+// spherical linear interpolation
+function slerp(p0,p1,t) = let(a = anglev(p0,p1)) (sin((1-t)*a)*p0 + sin(t*a)*p1) / sin(a);
 
 function sinh(x) = (1 - exp( -2 * x) )/ (2 * exp(-x));
 function cosh(x) = (1 + exp( -2 * x)) / (2 * exp(-x));
@@ -521,19 +523,10 @@ function signed_volume(poly) = is_poly_vector(poly) ?
   sum([for (p=poly) _signed_volume(p)]) :
   _signed_volume(poly);
 
-function _signed_volume(poly) =
-  let(
-    points = poly[0],
-    faces = poly[1]
-  )
-  sum([for(face = faces)
-    let(l = len(face))
-    (l > 2) ?
-      sum([ for(i = [1:l-2])
-        cross(points[face[i+1]], points[face[i]]) * points[face[0]]
-      ]) / 6 :
-      0
-  ]);
+function _signed_volume(poly) = let(points = poly[0])
+  sum([for(face = poly[1], i = [1:len(face)-2]) assert(len(face) > 2)
+    cross(points[face[i+1]], points[face[i]]) * points[face[0]]
+  ])/6;
 
 /* Visualizations */
 
